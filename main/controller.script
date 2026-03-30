@@ -1,0 +1,148 @@
+local asobi = require("asobi.client")
+local config = require("main.game_config")
+
+-- Game states
+local STATE_LOGIN = "login"
+local STATE_LOBBY = "lobby"
+local STATE_ARENA = "arena"
+local STATE_RESULTS = "results"
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	config.client = asobi.create(config.HOST, config.PORT)
+	self.state = STATE_LOGIN
+	self.mouse_x = 0
+	self.mouse_y = 0
+
+	-- Arena state
+	self.latest_state = nil
+	self.players = {}
+	self.projectiles = {}
+	self.searching = false
+	self.search_time = 0
+
+	-- Show login GUI
+	msg.post("#login_gui", "enable")
+	msg.post("#lobby_gui", "disable")
+	msg.post("#results_gui", "disable")
+end
+
+function update(self, dt)
+	if self.state == STATE_LOBBY and self.searching then
+		self.search_time = self.search_time + dt
+	end
+
+	if self.state == STATE_ARENA and self.latest_state then
+		-- Send input
+		local up = self.move_up or false
+		local down = self.move_down or false
+		local left = self.move_left or false
+		local right = self.move_right or false
+		local shoot = self.shoot or false
+
+		if up or down or left or right or shoot then
+			config.client.realtime.send_match_input({
+				up = up,
+				down = down,
+				left = left,
+				right = right,
+				shoot = shoot,
+				aim_x = self.mouse_x,
+				aim_y = config.ARENA_HEIGHT - self.mouse_y,
+			})
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("move_up") then
+		self.move_up = not action.released
+	elseif action_id == hash("move_down") then
+		self.move_down = not action.released
+	elseif action_id == hash("move_left") then
+		self.move_left = not action.released
+	elseif action_id == hash("move_right") then
+		self.move_right = not action.released
+	elseif action_id == hash("shoot") then
+		self.shoot = not action.released
+	end
+
+	-- Track mouse position (always available, no action_id)
+	if action.x and action.y then
+		-- Convert screen coords to arena coords
+		local screen_w = tonumber(sys.get_config("display.width"))
+		local screen_h = tonumber(sys.get_config("display.height"))
+		self.mouse_x = (action.x / screen_w) * config.ARENA_WIDTH
+		self.mouse_y = (action.y / screen_h) * config.ARENA_HEIGHT
+	end
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("switch_to_lobby") then
+		self.state = STATE_LOBBY
+		msg.post("#login_gui", "disable")
+		msg.post("#lobby_gui", "enable")
+		msg.post("#results_gui", "disable")
+		connect_realtime(self)
+
+	elseif message_id == hash("switch_to_arena") then
+		self.state = STATE_ARENA
+		msg.post("#login_gui", "disable")
+		msg.post("#lobby_gui", "disable")
+		msg.post("#results_gui", "disable")
+		setup_arena_callbacks(self)
+
+	elseif message_id == hash("switch_to_results") then
+		self.state = STATE_RESULTS
+		msg.post("#login_gui", "disable")
+		msg.post("#lobby_gui", "disable")
+		msg.post("#results_gui", "enable")
+
+	elseif message_id == hash("switch_to_login") then
+		self.state = STATE_LOGIN
+		msg.post("#login_gui", "enable")
+		msg.post("#lobby_gui", "disable")
+		msg.post("#results_gui", "disable")
+
+	elseif message_id == hash("find_match") then
+		self.searching = true
+		self.search_time = 0
+		config.client.realtime.add_to_matchmaker(config.GAME_MODE)
+
+	elseif message_id == hash("cancel_search") then
+		self.searching = false
+	end
+end
+
+function connect_realtime(self)
+	local rt = config.client.realtime
+
+	rt.on("connected", function()
+		msg.post("#lobby_gui", "set_status", {text = "Connected! Ready to play."})
+	end)
+
+	rt.on("matchmaker_matched", function(payload)
+		self.searching = false
+		msg.post(".", "switch_to_arena")
+	end)
+
+	rt.on("error", function(payload)
+		self.searching = false
+		msg.post("#lobby_gui", "set_status", {text = "Error: " .. tostring(payload.error or "unknown")})
+	end)
+
+	rt.connect()
+end
+
+function setup_arena_callbacks(self)
+	local rt = config.client.realtime
+
+	rt.on("match_state", function(payload)
+		self.latest_state = payload
+	end)
+
+	rt.on("match_finished", function(payload)
+		config.match_result = payload
+		msg.post(".", "switch_to_results")
+	end)
+end

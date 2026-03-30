@@ -1,0 +1,78 @@
+local config = require("main.game_config")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	show_results(self)
+	submit_and_fetch(self)
+end
+
+function show_results(self)
+	local result = config.match_result or {}
+	local standings = result.standings or {}
+	local winner = result.winner or ""
+	local my_id = config.client.player_id or ""
+
+	if winner == my_id then
+		gui.set_text(gui.get_node("title"), "VICTORY!")
+		gui.set_color(gui.get_node("title"), vmath.vector4(1, 1, 0, 1))
+	else
+		gui.set_text(gui.get_node("title"), "DEFEAT")
+		gui.set_color(gui.get_node("title"), vmath.vector4(1, 0, 0, 1))
+	end
+
+	local lines = {}
+	for _, entry in ipairs(standings) do
+		local pid = entry.player_id or ""
+		local kills = entry.kills or 0
+		local deaths = entry.deaths or 0
+		local rank = entry.rank or 0
+		local suffix = pid == my_id and " (YOU)" or ""
+		table.insert(lines, "#" .. rank .. "  " .. string.sub(pid, 1, 12) .. suffix .. "  K:" .. kills .. " D:" .. deaths)
+	end
+	gui.set_text(gui.get_node("standings"), table.concat(lines, "\n"))
+end
+
+function submit_and_fetch(self)
+	local result = config.match_result or {}
+	local standings = result.standings or {}
+	local my_id = config.client.player_id or ""
+	local my_kills = 0
+
+	for _, entry in ipairs(standings) do
+		if entry.player_id == my_id then
+			my_kills = entry.kills or 0
+			break
+		end
+	end
+
+	config.client.leaderboards.submit_score(config.client, config.LEADERBOARD_ID, my_kills, 0, function(data, err)
+		config.client.leaderboards.get_top(config.client, config.LEADERBOARD_ID, 10, function(data, err)
+			if err then
+				gui.set_text(gui.get_node("leaderboard"), "Failed to load leaderboard")
+				return
+			end
+			local entries = data.entries or data or {}
+			local lines = {"--- TOP 10 ---"}
+			for i, e in ipairs(entries) do
+				local pid = e.player_id or ""
+				local score = e.score or 0
+				local marker = pid == my_id and " *" or ""
+				table.insert(lines, i .. ". " .. string.sub(pid, 1, 12) .. " - " .. score .. " kills" .. marker)
+			end
+			gui.set_text(gui.get_node("leaderboard"), table.concat(lines, "\n"))
+		end)
+	end)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("shoot") and action.pressed then
+		if gui.pick_node(gui.get_node("play_again_btn"), action.x, action.y) then
+			msg.post("/controller#script", "switch_to_lobby")
+			return true
+		elseif gui.pick_node(gui.get_node("quit_btn"), action.x, action.y) then
+			msg.post("/controller#script", "switch_to_login")
+			return true
+		end
+	end
+	return false
+end

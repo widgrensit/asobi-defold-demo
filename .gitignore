@@ -1,0 +1,7 @@
+/.internal
+/build
+.externalToolBuilders
+.DS_Store
+
+# Symlinked SDK
+asobi

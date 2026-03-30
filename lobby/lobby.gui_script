@@ -1,0 +1,41 @@
+local config = require("main.game_config")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.searching = false
+	gui.set_text(gui.get_node("player_info"), "Player: " .. (config.client.player_id or ""))
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("shoot") and action.pressed then
+		local find_btn = gui.get_node("find_btn")
+		local cancel_btn = gui.get_node("cancel_btn")
+
+		if not self.searching and gui.pick_node(find_btn, action.x, action.y) then
+			self.searching = true
+			gui.set_enabled(gui.get_node("find_btn"), false)
+			gui.set_enabled(gui.get_node("find_btn_text"), false)
+			gui.set_enabled(gui.get_node("cancel_btn"), true)
+			gui.set_enabled(gui.get_node("cancel_btn_text"), true)
+			gui.set_text(gui.get_node("status"), "Searching for match...")
+			msg.post("/controller#script", "find_match")
+			return true
+		elseif self.searching and gui.pick_node(cancel_btn, action.x, action.y) then
+			self.searching = false
+			gui.set_enabled(gui.get_node("find_btn"), true)
+			gui.set_enabled(gui.get_node("find_btn_text"), true)
+			gui.set_enabled(gui.get_node("cancel_btn"), false)
+			gui.set_enabled(gui.get_node("cancel_btn_text"), false)
+			gui.set_text(gui.get_node("status"), "Connected! Ready to play.")
+			msg.post("/controller#script", "cancel_search")
+			return true
+		end
+	end
+	return false
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("set_status") then
+		gui.set_text(gui.get_node("status"), message.text or "")
+	end
+end

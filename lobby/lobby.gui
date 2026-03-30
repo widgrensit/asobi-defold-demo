@@ -1,0 +1,58 @@
+script: "/lobby/lobby.gui_script"
+nodes {
+  type: TYPE_TEXT
+  id: "player_info"
+  text: "Player: ..."
+  font: "system_font"
+  position { x: 640.0 y: 500.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.6 y: 0.6 z: 0.6 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "status"
+  text: "Connecting..."
+  font: "system_font"
+  position { x: 640.0 y: 420.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "find_btn"
+  size { x: 250.0 y: 60.0 z: 0.0 w: 1.0 }
+  color { x: 0.0 y: 0.8 z: 0.8 w: 1.0 }
+  position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "find_btn_text"
+  text: "FIND MATCH"
+  font: "system_font"
+  position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "cancel_btn"
+  size { x: 250.0 y: 60.0 z: 0.0 w: 1.0 }
+  color { x: 0.8 y: 0.2 z: 0.2 w: 1.0 }
+  position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "cancel_btn_text"
+  text: "CANCEL"
+  font: "system_font"
+  position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  enabled: false
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}

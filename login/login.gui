@@ -1,0 +1,84 @@
+script: "/login/login.gui_script"
+nodes {
+  type: TYPE_BOX
+  id: "panel"
+  size { x: 400.0 y: 350.0 z: 0.0 w: 1.0 }
+  color { x: 0.15 y: 0.15 z: 0.2 w: 0.9 }
+  position { x: 640.0 y: 360.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "title"
+  text: "ASOBI ARENA"
+  font: "system_font"
+  size { x: 400.0 y: 50.0 z: 0.0 w: 1.0 }
+  color { x: 1.0 y: 1.0 z: 1.0 w: 1.0 }
+  position { x: 640.0 y: 480.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "username_label"
+  text: "Username:"
+  font: "system_font"
+  position { x: 540.0 y: 420.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_W
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "password_label"
+  text: "Password:"
+  font: "system_font"
+  position { x: 540.0 y: 380.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_W
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "login_btn"
+  size { x: 130.0 y: 40.0 z: 0.0 w: 1.0 }
+  color { x: 0.0 y: 0.8 z: 0.8 w: 1.0 }
+  position { x: 590.0 y: 320.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "login_btn_text"
+  text: "LOGIN"
+  font: "system_font"
+  position { x: 590.0 y: 320.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "register_btn"
+  size { x: 130.0 y: 40.0 z: 0.0 w: 1.0 }
+  color { x: 0.0 y: 0.8 z: 0.4 w: 1.0 }
+  position { x: 730.0 y: 320.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "register_btn_text"
+  text: "REGISTER"
+  font: "system_font"
+  position { x: 730.0 y: 320.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "status"
+  text: ""
+  font: "system_font"
+  position { x: 640.0 y: 260.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 1.0 y: 1.0 z: 0.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}

@@ -1,0 +1,64 @@
+script: "/results/results.gui_script"
+nodes {
+  type: TYPE_TEXT
+  id: "title"
+  text: "RESULTS"
+  font: "system_font"
+  position { x: 640.0 y: 580.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "standings"
+  text: ""
+  font: "system_font"
+  position { x: 640.0 y: 480.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "leaderboard"
+  text: "Loading leaderboard..."
+  font: "system_font"
+  position { x: 640.0 y: 320.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "play_again_btn"
+  size { x: 160.0 y: 50.0 z: 0.0 w: 1.0 }
+  color { x: 0.0 y: 0.8 z: 0.8 w: 1.0 }
+  position { x: 560.0 y: 150.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "play_again_text"
+  text: "PLAY AGAIN"
+  font: "system_font"
+  position { x: 560.0 y: 150.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "quit_btn"
+  size { x: 160.0 y: 50.0 z: 0.0 w: 1.0 }
+  color { x: 0.8 y: 0.2 z: 0.2 w: 1.0 }
+  position { x: 720.0 y: 150.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "quit_text"
+  text: "QUIT"
+  font: "system_font"
+  position { x: 720.0 y: 150.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
