@@ -17,6 +17,12 @@ components {
   rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 components {
+  id: "arena_gui"
+  component: "/arena/arena.gui"
+  position { x: 0.0 y: 0.0 z: 0.0 }
+  rotation { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+components {
   id: "results_gui"
   component: "/results/results.gui"
   position { x: 0.0 y: 0.0 z: 0.0 }

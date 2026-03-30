@@ -1,0 +1,43 @@
+script: "/arena/arena.gui_script"
+fonts {
+  name: "system_font"
+  font: "/builtins/fonts/default.font"
+}
+nodes {
+  type: TYPE_BOX
+  id: "arena_bg"
+  size { x: 800.0 y: 600.0 z: 0.0 w: 1.0 }
+  color { x: 0.1 y: 0.1 z: 0.15 w: 1.0 }
+  position { x: 640.0 y: 360.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "hud_timer"
+  text: "1:30"
+  font: "system_font"
+  position { x: 640.0 y: 690.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 1.0 y: 1.0 z: 1.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "hud_stats"
+  text: "K: 0  D: 0"
+  font: "system_font"
+  position { x: 240.0 y: 690.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_W
+  color { x: 0.8 y: 0.8 z: 0.8 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "hud_hp"
+  text: "HP: 100"
+  font: "system_font"
+  position { x: 1040.0 y: 690.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_E
+  color { x: 0.4 y: 1.0 z: 0.4 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}

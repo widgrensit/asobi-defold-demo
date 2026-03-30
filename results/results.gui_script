@@ -2,15 +2,19 @@ local config = require("main.game_config")
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	show_results(self)
-	submit_and_fetch(self)
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("show_results") then
+		show_results(self)
+		submit_and_fetch(self)
+	end
 end
 
 function show_results(self)
 	local payload = config.match_result or {}
-	local result = payload.result or {}
-	local standings = result.standings or {}
-	local winner = result.winner or ""
+	local standings = payload.standings or {}
+	local winner = payload.winner or ""
 	local my_id = config.client.player_id or ""
 
 	if winner == my_id then
@@ -34,8 +38,8 @@ function show_results(self)
 end
 
 function submit_and_fetch(self)
-	local result = config.match_result or {}
-	local standings = result.standings or {}
+	local payload = config.match_result or {}
+	local standings = payload.standings or {}
 	local my_id = config.client.player_id or ""
 	local my_kills = 0
 
