@@ -64,12 +64,11 @@ function on_input(self, action_id, action)
 		self.shoot = not action.released
 	end
 
-	-- Track mouse position
+	-- Track mouse position, converting screen coords to arena coords
+	-- Arena (800x600) is rendered at offset (240, 60) on 1280x720 display
 	if action.x and action.y then
-		local screen_w = tonumber(sys.get_config("display.width"))
-		local screen_h = tonumber(sys.get_config("display.height"))
-		self.mouse_x = (action.x / screen_w) * config.ARENA_WIDTH
-		self.mouse_y = (action.y / screen_h) * config.ARENA_HEIGHT
+		self.mouse_x = action.x - 240
+		self.mouse_y = config.ARENA_HEIGHT - (action.y - 60)
 	end
 end
 

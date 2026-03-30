@@ -13,8 +13,9 @@ end
 
 function show_results(self)
 	local payload = config.match_result or {}
-	local standings = payload.standings or {}
-	local winner = payload.winner or ""
+	local result = payload.result or {}
+	local standings = result.standings or {}
+	local winner = result.winner or ""
 	local my_id = config.client.player_id or ""
 
 	if winner == my_id then
@@ -39,7 +40,8 @@ end
 
 function submit_and_fetch(self)
 	local payload = config.match_result or {}
-	local standings = payload.standings or {}
+	local result = payload.result or {}
+	local standings = result.standings or {}
 	local my_id = config.client.player_id or ""
 	local my_kills = 0
 
