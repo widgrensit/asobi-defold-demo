@@ -7,7 +7,8 @@ function init(self)
 end
 
 function show_results(self)
-	local result = config.match_result or {}
+	local payload = config.match_result or {}
+	local result = payload.result or {}
 	local standings = result.standings or {}
 	local winner = result.winner or ""
 	local my_id = config.client.player_id or ""
