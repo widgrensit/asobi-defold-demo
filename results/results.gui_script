@@ -2,8 +2,14 @@ local config = require("main.game_config")
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	show_results(self)
-	submit_and_fetch(self)
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("show_results") then
+		show_results(self)
+		submit_and_fetch(self)
+		gui.set_text(gui.get_node("auto_queue_text"), "Auto-queuing in 3s...")
+	end
 end
 
 function show_results(self)
@@ -12,13 +18,14 @@ function show_results(self)
 	local standings = result.standings or {}
 	local winner = result.winner or ""
 	local my_id = config.client.player_id or ""
+	local C = config.COLORS
 
 	if winner == my_id then
 		gui.set_text(gui.get_node("title"), "VICTORY!")
-		gui.set_color(gui.get_node("title"), vmath.vector4(1, 1, 0, 1))
+		gui.set_color(gui.get_node("title"), C.tertiary)
 	else
 		gui.set_text(gui.get_node("title"), "DEFEAT")
-		gui.set_color(gui.get_node("title"), vmath.vector4(1, 0, 0, 1))
+		gui.set_color(gui.get_node("title"), C.error)
 	end
 
 	local lines = {}
@@ -34,7 +41,8 @@ function show_results(self)
 end
 
 function submit_and_fetch(self)
-	local result = config.match_result or {}
+	local payload = config.match_result or {}
+	local result = payload.result or {}
 	local standings = result.standings or {}
 	local my_id = config.client.player_id or ""
 	local my_kills = 0

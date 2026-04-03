@@ -1,0 +1,140 @@
+script: "/boon/boon.gui_script"
+fonts {
+  name: "system_font"
+  font: "/builtins/fonts/default.font"
+}
+nodes {
+  type: TYPE_BOX
+  id: "bg"
+  size { x: 1280.0 y: 720.0 z: 0.0 w: 1.0 }
+  color { x: 0.051 y: 0.122 z: 0.235 w: 1.0 }
+  position { x: 640.0 y: 360.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
+  type: TYPE_TEXT
+  id: "title"
+  text: "Choose Your Upgrade"
+  font: "system_font"
+  position { x: 640.0 y: 600.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.788 y: 0.745 z: 1.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 1.5 y: 1.5 z: 1.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "timer"
+  text: "15s"
+  font: "system_font"
+  position { x: 640.0 y: 560.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.569 y: 0.804 z: 1.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_BOX
+  id: "card_1"
+  size { x: 200.0 y: 160.0 z: 0.0 w: 1.0 }
+  color { x: 0.110 y: 0.122 z: 0.176 w: 1.0 }
+  position { x: 400.0 y: 380.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "card_1_name"
+  text: ""
+  font: "system_font"
+  position { x: 400.0 y: 420.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.788 y: 0.745 z: 1.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "card_1_desc"
+  text: ""
+  font: "system_font"
+  position { x: 400.0 y: 370.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.878 y: 0.882 z: 0.961 w: 0.8 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 0.8 y: 0.8 z: 1.0 w: 1.0 }
+  enabled: false
+}
+nodes {
+  type: TYPE_BOX
+  id: "card_2"
+  size { x: 200.0 y: 160.0 z: 0.0 w: 1.0 }
+  color { x: 0.110 y: 0.122 z: 0.176 w: 1.0 }
+  position { x: 640.0 y: 380.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "card_2_name"
+  text: ""
+  font: "system_font"
+  position { x: 640.0 y: 420.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.788 y: 0.745 z: 1.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "card_2_desc"
+  text: ""
+  font: "system_font"
+  position { x: 640.0 y: 370.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.878 y: 0.882 z: 0.961 w: 0.8 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 0.8 y: 0.8 z: 1.0 w: 1.0 }
+  enabled: false
+}
+nodes {
+  type: TYPE_BOX
+  id: "card_3"
+  size { x: 200.0 y: 160.0 z: 0.0 w: 1.0 }
+  color { x: 0.110 y: 0.122 z: 0.176 w: 1.0 }
+  position { x: 880.0 y: 380.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "card_3_name"
+  text: ""
+  font: "system_font"
+  position { x: 880.0 y: 420.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.788 y: 0.745 z: 1.0 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "card_3_desc"
+  text: ""
+  font: "system_font"
+  position { x: 880.0 y: 370.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.878 y: 0.882 z: 0.961 w: 0.8 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 0.8 y: 0.8 z: 1.0 w: 1.0 }
+  enabled: false
+}
+nodes {
+  type: TYPE_TEXT
+  id: "waiting_text"
+  text: ""
+  font: "system_font"
+  position { x: 640.0 y: 220.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+  color { x: 0.576 y: 0.557 z: 0.627 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}

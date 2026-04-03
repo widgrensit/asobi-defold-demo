@@ -3,7 +3,6 @@ local config = require("main.game_config")
 function init(self)
 	msg.post(".", "acquire_input_focus")
 	self.searching = false
-	gui.set_text(gui.get_node("player_info"), "Player: " .. (config.client.player_id or ""))
 end
 
 function on_input(self, action_id, action)
@@ -37,5 +36,7 @@ end
 function on_message(self, message_id, message)
 	if message_id == hash("set_status") then
 		gui.set_text(gui.get_node("status"), message.text or "")
+		-- Also update player info each time status changes
+		gui.set_text(gui.get_node("player_info"), "Player: " .. (config.client.player_id or "..."))
 	end
 end

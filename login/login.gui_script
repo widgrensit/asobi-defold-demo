@@ -1,24 +1,75 @@
 local config = require("main.game_config")
 
--- Defold doesn't have native text input fields in GUI.
--- For this demo, we use hardcoded credentials or command-line args.
--- A production app would use a native extension for text input.
-
-local username = "player" .. math.random(1000, 9999)
-local password = "password"
+local FIELD_USERNAME = 1
+local FIELD_PASSWORD = 2
 
 function init(self)
+	self.username = ""
+	self.password = ""
+	self.active_field = FIELD_USERNAME
+	self.cursor_visible = true
+	self.cursor_timer = 0
 	msg.post(".", "acquire_input_focus")
-	gui.set_text(gui.get_node("username_label"), "User: " .. username)
-	gui.set_text(gui.get_node("password_label"), "Pass: ****")
+	update_fields(self)
+end
+
+function update(self, dt)
+	self.cursor_timer = self.cursor_timer + dt
+	if self.cursor_timer >= 0.5 then
+		self.cursor_timer = 0
+		self.cursor_visible = not self.cursor_visible
+		update_fields(self)
+	end
 end
 
 function on_input(self, action_id, action)
-	if action_id == hash("shoot") and action.pressed then
+	if action_id == hash("text") then
+		if self.active_field == FIELD_USERNAME then
+			self.username = self.username .. action.text
+		else
+			self.password = self.password .. action.text
+		end
+		reset_cursor(self)
+		update_fields(self)
+		return true
+	elseif action_id == hash("backspace") and action.pressed then
+		if self.active_field == FIELD_USERNAME then
+			self.username = self.username:sub(1, -2)
+		else
+			self.password = self.password:sub(1, -2)
+		end
+		reset_cursor(self)
+		update_fields(self)
+		return true
+	elseif action_id == hash("tab") and action.pressed then
+		if self.active_field == FIELD_USERNAME then
+			self.active_field = FIELD_PASSWORD
+		else
+			self.active_field = FIELD_USERNAME
+		end
+		reset_cursor(self)
+		update_fields(self)
+		return true
+	elseif action_id == hash("enter") and action.pressed then
+		do_login(self)
+		return true
+	elseif action_id == hash("shoot") and action.pressed then
 		local login_btn = gui.get_node("login_btn")
 		local register_btn = gui.get_node("register_btn")
+		local username_box = gui.get_node("username_box")
+		local password_box = gui.get_node("password_box")
 
-		if gui.pick_node(login_btn, action.x, action.y) then
+		if gui.pick_node(username_box, action.x, action.y) then
+			self.active_field = FIELD_USERNAME
+			reset_cursor(self)
+			update_fields(self)
+			return true
+		elseif gui.pick_node(password_box, action.x, action.y) then
+			self.active_field = FIELD_PASSWORD
+			reset_cursor(self)
+			update_fields(self)
+			return true
+		elseif gui.pick_node(login_btn, action.x, action.y) then
 			do_login(self)
 			return true
 		elseif gui.pick_node(register_btn, action.x, action.y) then
@@ -29,11 +80,39 @@ function on_input(self, action_id, action)
 	return false
 end
 
+function reset_cursor(self)
+	self.cursor_visible = true
+	self.cursor_timer = 0
+end
+
+function update_fields(self)
+	local cursor = self.cursor_visible and "|" or ""
+	local C = config.COLORS
+
+	if self.active_field == FIELD_USERNAME then
+		gui.set_text(gui.get_node("username_text"), self.username .. cursor)
+		gui.set_text(gui.get_node("password_text"), string.rep("*", #self.password))
+		gui.set_color(gui.get_node("username_box"), C.surface_high)
+		gui.set_color(gui.get_node("password_box"), C.surface)
+	else
+		gui.set_text(gui.get_node("username_text"), self.username)
+		gui.set_text(gui.get_node("password_text"), string.rep("*", #self.password) .. cursor)
+		gui.set_color(gui.get_node("username_box"), C.surface)
+		gui.set_color(gui.get_node("password_box"), C.surface_high)
+	end
+end
+
 function do_login(self)
+	if #self.username == 0 or #self.password == 0 then
+		gui.set_text(gui.get_node("status"), "Enter username and password")
+		return
+	end
 	gui.set_text(gui.get_node("status"), "Logging in...")
-	config.client.auth.login(config.client, username, password, function(data, err)
+	gui.set_color(gui.get_node("status"), config.COLORS.secondary)
+	config.client.auth.login(config.client, self.username, self.password, function(data, err)
 		if err then
 			gui.set_text(gui.get_node("status"), "Login failed: " .. tostring(err))
+			gui.set_color(gui.get_node("status"), config.COLORS.error)
 		else
 			msg.post("/controller#script", "switch_to_lobby")
 		end
@@ -41,10 +120,16 @@ function do_login(self)
 end
 
 function do_register(self)
+	if #self.username == 0 or #self.password == 0 then
+		gui.set_text(gui.get_node("status"), "Enter username and password")
+		return
+	end
 	gui.set_text(gui.get_node("status"), "Registering...")
-	config.client.auth.register(config.client, username, password, nil, function(data, err)
+	gui.set_color(gui.get_node("status"), config.COLORS.secondary)
+	config.client.auth.register(config.client, self.username, self.password, nil, function(data, err)
 		if err then
 			gui.set_text(gui.get_node("status"), "Register failed: " .. tostring(err))
+			gui.set_color(gui.get_node("status"), config.COLORS.error)
 		else
 			msg.post("/controller#script", "switch_to_lobby")
 		end
