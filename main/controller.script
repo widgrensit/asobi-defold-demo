@@ -4,8 +4,23 @@ local config = require("main.game_config")
 -- Game states
 local STATE_LOGIN = "login"
 local STATE_LOBBY = "lobby"
+local STATE_COUNTDOWN = "countdown"
 local STATE_ARENA = "arena"
+local STATE_BOON_PICK = "boon_pick"
+local STATE_VOTING = "voting"
 local STATE_RESULTS = "results"
+
+local ALL_GUIS = {"login_gui", "lobby_gui", "countdown_gui", "arena_gui", "boon_gui", "vote_gui", "results_gui"}
+
+local function show_only(gui_id)
+	for _, id in ipairs(ALL_GUIS) do
+		if id == gui_id then
+			msg.post("#" .. id, "enable")
+		else
+			msg.post("#" .. id, "disable")
+		end
+	end
+end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
@@ -18,12 +33,11 @@ function init(self)
 	self.latest_state = nil
 	self.searching = false
 	self.search_time = 0
+	self.match_started = false
+	self.current_phase = nil
+	self.auto_queue_timer = nil
 
-	-- Show login GUI only
-	msg.post("#login_gui", "enable")
-	msg.post("#lobby_gui", "disable")
-	msg.post("#arena_gui", "disable")
-	msg.post("#results_gui", "disable")
+	show_only("login_gui")
 end
 
 function update(self, dt)
@@ -31,8 +45,7 @@ function update(self, dt)
 		self.search_time = self.search_time + dt
 	end
 
-	if self.state == STATE_ARENA then
-		-- Always send input so aim updates reach the server
+	if self.state == STATE_ARENA and self.match_started then
 		config.client.realtime.send_match_input({
 			up = self.move_up or false,
 			down = self.move_down or false,
@@ -43,10 +56,23 @@ function update(self, dt)
 			aim_y = self.mouse_y,
 		})
 
-		-- Forward match state to arena GUI for rendering
 		if self.latest_state then
-			msg.post("#arena_gui", "match_state", self.latest_state)
+			-- Store in config since match state has nested tables
+			config.latest_match_state = self.latest_state
+			msg.post("#arena_gui", "match_state")
 			self.latest_state = nil
+		end
+	end
+
+	-- Auto-queue timer after results
+	if self.auto_queue_timer then
+		self.auto_queue_timer = self.auto_queue_timer - dt
+		if self.auto_queue_timer <= 0 then
+			self.auto_queue_timer = nil
+			msg.post(".", "switch_to_lobby")
+			timer.delay(0.2, false, function()
+				msg.post(".", "find_match")
+			end)
 		end
 	end
 end
@@ -64,8 +90,6 @@ function on_input(self, action_id, action)
 		self.shoot = not action.released
 	end
 
-	-- Track mouse position, converting screen coords to arena coords
-	-- Arena (800x600) is rendered at offset (240, 60) on 1280x720 display
 	if action.x and action.y then
 		self.mouse_x = action.x - 240
 		self.mouse_y = config.ARENA_HEIGHT - (action.y - 60)
@@ -75,34 +99,59 @@ end
 function on_message(self, message_id, message)
 	if message_id == hash("switch_to_lobby") then
 		self.state = STATE_LOBBY
-		msg.post("#login_gui", "disable")
-		msg.post("#lobby_gui", "enable")
-		msg.post("#arena_gui", "disable")
-		msg.post("#results_gui", "disable")
+		self.match_started = false
+		self.current_phase = nil
+		self.auto_queue_timer = nil
+		show_only("lobby_gui")
 		connect_realtime(self)
+
+	elseif message_id == hash("switch_to_countdown") then
+		self.state = STATE_COUNTDOWN
+		self.match_started = false
+		self.current_phase = "countdown"
+		show_only("countdown_gui")
+		msg.post("#countdown_gui", "start_countdown")
+
+	elseif message_id == hash("countdown_done") then
+		self.state = STATE_ARENA
+		self.match_started = true
+		self.current_phase = nil
+		show_only("arena_gui")
 
 	elseif message_id == hash("switch_to_arena") then
 		self.state = STATE_ARENA
-		msg.post("#login_gui", "disable")
-		msg.post("#lobby_gui", "disable")
-		msg.post("#arena_gui", "enable")
-		msg.post("#results_gui", "disable")
-		setup_arena_callbacks(self)
+		self.match_started = true
+		self.current_phase = nil
+		show_only("arena_gui")
+
+	elseif message_id == hash("switch_to_boon_pick") then
+		self.state = STATE_BOON_PICK
+		self.current_phase = "boon_pick"
+		show_only("boon_gui")
+		-- Complex data passed via config (msg.post cannot carry nested tables)
+		msg.post("#boon_gui", "show_boons")
+
+	elseif message_id == hash("switch_to_voting") then
+		self.state = STATE_VOTING
+		self.current_phase = "voting"
+		show_only("vote_gui")
+		-- Complex data passed via config
+		msg.post("#vote_gui", "show_vote")
 
 	elseif message_id == hash("switch_to_results") then
 		self.state = STATE_RESULTS
-		msg.post("#login_gui", "disable")
-		msg.post("#lobby_gui", "disable")
-		msg.post("#arena_gui", "disable")
-		msg.post("#results_gui", "enable")
+		self.match_started = false
+		self.current_phase = "finished"
+		show_only("results_gui")
 		msg.post("#results_gui", "show_results")
+		self.auto_queue_timer = 3.0
 
 	elseif message_id == hash("switch_to_login") then
 		self.state = STATE_LOGIN
-		msg.post("#login_gui", "enable")
-		msg.post("#lobby_gui", "disable")
-		msg.post("#arena_gui", "disable")
-		msg.post("#results_gui", "disable")
+		self.match_started = false
+		self.current_phase = nil
+		self.auto_queue_timer = nil
+		show_only("login_gui")
 
 	elseif message_id == hash("find_match") then
 		self.searching = true
@@ -111,6 +160,15 @@ function on_message(self, message_id, message)
 
 	elseif message_id == hash("cancel_search") then
 		self.searching = false
+
+	elseif message_id == hash("boon_picked") then
+		config.client.realtime.send_match_input({
+			type = "boon_pick",
+			boon_id = message.boon_id
+		})
+
+	elseif message_id == hash("vote_cast") then
+		config.client.realtime.cast_vote(message.vote_id, message.option_id)
 	end
 end
 
@@ -127,7 +185,10 @@ function connect_realtime(self)
 
 	rt.on("matchmaker_matched", function(payload)
 		self.searching = false
-		msg.post(".", "switch_to_arena")
+		if payload.match_id then
+			config.client.realtime.join_match(payload.match_id)
+		end
+		msg.post(".", "switch_to_countdown")
 	end)
 
 	rt.on("error", function(payload)
@@ -135,18 +196,80 @@ function connect_realtime(self)
 		msg.post("#lobby_gui", "set_status", {text = "WS error: " .. tostring(payload.error or "unknown")})
 	end)
 
+	setup_match_callbacks(self)
 	rt.connect()
 end
 
-function setup_arena_callbacks(self)
+function setup_match_callbacks(self)
 	local rt = config.client.realtime
 
 	rt.on("match_state", function(payload)
-		self.latest_state = payload
+		local phase = payload.phase or "playing"
+
+		if phase == "playing" then
+			if self.current_phase == "boon_pick" or self.current_phase == "voting" then
+				msg.post(".", "switch_to_arena")
+			end
+			self.latest_state = payload
+			config.current_round = payload.round or config.current_round
+			config.current_modifier = payload.modifier
+		elseif phase == "boon_pick" then
+			if self.current_phase ~= "boon_pick" then
+				-- Store complex data in config for the boon GUI to read
+				config.boon_data = {
+					boon_offers = payload.boon_offers or {},
+					time_remaining = payload.time_remaining or 15000,
+					picks_done = payload.picks_done or {},
+				}
+				msg.post(".", "switch_to_boon_pick")
+			else
+				-- Update existing boon pick screen
+				config.boon_data = config.boon_data or {}
+				config.boon_data.picks_done = payload.picks_done or {}
+				config.boon_data.time_remaining = payload.time_remaining or 0
+				msg.post("#boon_gui", "update_boons")
+			end
+		end
+	end)
+
+	rt.on("match_started", function(payload)
+		self.current_phase = nil
+		self.match_started = true
+		msg.post(".", "switch_to_arena")
 	end)
 
 	rt.on("match_finished", function(payload)
 		config.match_result = payload
 		msg.post(".", "switch_to_results")
+	end)
+
+	rt.on("vote_start", function(payload)
+		-- Store complex data in config for the vote GUI to read
+		config.vote_data = {
+			vote_id = payload.vote_id,
+			options = payload.options or {},
+			window_ms = payload.window_ms or 10000,
+		}
+		msg.post(".", "switch_to_voting")
+	end)
+
+	rt.on("vote_tally", function(payload)
+		if self.state == STATE_VOTING then
+			config.vote_tally_data = {
+				tallies = payload.tallies or {},
+				total_votes = payload.total_votes or 0,
+				time_remaining_ms = payload.time_remaining_ms or 0,
+			}
+			msg.post("#vote_gui", "vote_tally")
+		end
+	end)
+
+	rt.on("vote_result", function(payload)
+		if self.state == STATE_VOTING then
+			config.vote_result_data = {
+				winner = payload.winner,
+			}
+			msg.post("#vote_gui", "vote_result")
+		end
 	end)
 end

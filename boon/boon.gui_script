@@ -1,0 +1,83 @@
+local config = require("main.game_config")
+
+local MAX_CARDS = 3
+local offers = {}
+local picked = false
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	picked = false
+	offers = {}
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("show_boons") then
+		picked = false
+		local data = config.boon_data or {}
+		offers = data.boon_offers or {}
+		local time_remaining = data.time_remaining or 15000
+
+		gui.set_text(gui.get_node("timer"), math.ceil(time_remaining / 1000) .. "s")
+		gui.set_text(gui.get_node("waiting_text"), "")
+
+		for i = 1, MAX_CARDS do
+			local boon = offers[i]
+			local card = gui.get_node("card_" .. i)
+			local name = gui.get_node("card_" .. i .. "_name")
+			local desc = gui.get_node("card_" .. i .. "_desc")
+
+			if boon then
+				gui.set_enabled(card, true)
+				gui.set_enabled(name, true)
+				gui.set_enabled(desc, true)
+				gui.set_text(name, boon.name or "???")
+				gui.set_text(desc, boon.description or "")
+				gui.set_color(card, config.COLORS.surface)
+			else
+				gui.set_enabled(card, false)
+				gui.set_enabled(name, false)
+				gui.set_enabled(desc, false)
+			end
+		end
+
+		if #offers == 0 then
+			gui.set_text(gui.get_node("waiting_text"), "Waiting for top players to pick...")
+		end
+
+	elseif message_id == hash("update_boons") then
+		local data = config.boon_data or {}
+		local picks_done = data.picks_done or {}
+		local time_remaining = data.time_remaining or 0
+		gui.set_text(gui.get_node("timer"), math.ceil(time_remaining / 1000) .. "s")
+
+		if picked then
+			gui.set_text(gui.get_node("waiting_text"),
+				"Picked! Waiting for others... (" .. #picks_done .. " done)")
+		end
+	end
+end
+
+function on_input(self, action_id, action)
+	if picked then return false end
+	if action_id ~= hash("shoot") or not action.pressed then return false end
+
+	for i = 1, MAX_CARDS do
+		if offers[i] then
+			local card = gui.get_node("card_" .. i)
+			if gui.get_enabled(card) and gui.pick_node(card, action.x, action.y) then
+				picked = true
+				gui.set_color(card, vmath.vector4(0.373, 0.255, 0.847, 0.4))
+				for j = 1, MAX_CARDS do
+					if j ~= i and offers[j] then
+						gui.set_color(gui.get_node("card_" .. j), vmath.vector4(0.1, 0.1, 0.15, 0.5))
+					end
+				end
+				gui.set_text(gui.get_node("waiting_text"),
+					"Picked " .. (offers[i].name or "") .. "! Waiting for others...")
+				msg.post("/controller#script", "boon_picked", {boon_id = offers[i].id})
+				return true
+			end
+		end
+	end
+	return false
+end

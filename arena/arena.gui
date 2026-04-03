@@ -7,7 +7,7 @@ nodes {
   type: TYPE_BOX
   id: "arena_bg"
   size { x: 800.0 y: 600.0 z: 0.0 w: 1.0 }
-  color { x: 0.1 y: 0.1 z: 0.15 w: 1.0 }
+  color { x: 0.051 y: 0.122 z: 0.235 w: 1.0 }
   position { x: 640.0 y: 360.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
 }
@@ -16,19 +16,20 @@ nodes {
   id: "hud_timer"
   text: "1:30"
   font: "system_font"
-  position { x: 640.0 y: 690.0 z: 0.0 w: 1.0 }
+  position { x: 640.0 y: 688.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
-  color { x: 1.0 y: 1.0 z: 1.0 w: 1.0 }
+  color { x: 0.569 y: 0.804 z: 1.0 w: 1.0 }
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 1.2 y: 1.2 z: 1.0 w: 1.0 }
 }
 nodes {
   type: TYPE_TEXT
   id: "hud_stats"
   text: "K: 0  D: 0"
   font: "system_font"
-  position { x: 240.0 y: 690.0 z: 0.0 w: 1.0 }
+  position { x: 245.0 y: 690.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_W
-  color { x: 0.8 y: 0.8 z: 0.8 w: 1.0 }
+  color { x: 0.878 y: 0.882 z: 0.961 w: 1.0 }
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 nodes {
@@ -36,8 +37,30 @@ nodes {
   id: "hud_hp"
   text: "HP: 100"
   font: "system_font"
-  position { x: 1040.0 y: 690.0 z: 0.0 w: 1.0 }
+  position { x: 1035.0 y: 690.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_E
-  color { x: 0.4 y: 1.0 z: 0.4 w: 1.0 }
+  color { x: 0.290 y: 0.882 z: 0.514 w: 1.0 }
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "hud_round"
+  text: "Round 1"
+  font: "system_font"
+  position { x: 1035.0 y: 670.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_E
+  color { x: 0.576 y: 0.557 z: 0.627 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 0.8 y: 0.8 z: 1.0 w: 1.0 }
+}
+nodes {
+  type: TYPE_TEXT
+  id: "hud_boons"
+  text: ""
+  font: "system_font"
+  position { x: 245.0 y: 65.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_W
+  color { x: 0.576 y: 0.557 z: 0.627 w: 1.0 }
+  outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  scale { x: 0.7 y: 0.7 z: 1.0 w: 1.0 }
 }

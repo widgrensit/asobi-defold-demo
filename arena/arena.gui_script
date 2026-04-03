@@ -3,11 +3,15 @@ local config = require("main.game_config")
 -- Arena 800x600 centered on 1280x720 display
 local OFFSET_X = 240
 local OFFSET_Y = 60
-local PLAYER_SIZE = 16
+local PLAYER_SIZE = 20
 local PROJECTILE_SIZE = 6
+local HP_BAR_W = 36
+local HP_BAR_H = 4
 
 local player_nodes = {}
 local player_labels = {}
+local player_hp_bg = {}
+local player_hp_bar = {}
 local projectile_nodes = {}
 
 function init(self)
@@ -15,7 +19,10 @@ end
 
 function on_message(self, message_id, message)
 	if message_id == hash("match_state") then
-		render_state(message)
+		local state = config.latest_match_state
+		if state then
+			render_state(state)
+		end
 	end
 end
 
@@ -24,12 +31,26 @@ function render_state(state)
 	local projectiles = state.projectiles or {}
 	local time_remaining = state.time_remaining or 0
 	local my_id = config.client.player_id
+	local C = config.COLORS
 
 	-- Update timer (time_remaining is in milliseconds)
 	local secs_total = math.floor(time_remaining / 1000)
 	local mins = math.floor(secs_total / 60)
 	local secs = secs_total % 60
-	gui.set_text(gui.get_node("hud_timer"), string.format("%d:%02d", mins, secs))
+	local timer_node = gui.get_node("hud_timer")
+	gui.set_text(timer_node, string.format("%d:%02d", mins, secs))
+	if secs_total <= 10 then
+		gui.set_color(timer_node, C.error)
+	else
+		gui.set_color(timer_node, C.secondary)
+	end
+
+	-- Update round + modifier display
+	local round_text = "Round " .. (state.round or config.current_round or 1)
+	if state.modifier or config.current_modifier then
+		round_text = round_text .. " | " .. (state.modifier or config.current_modifier)
+	end
+	gui.set_text(gui.get_node("hud_round"), round_text)
 
 	-- Convert players map to indexed list
 	local players = {}
@@ -42,6 +63,9 @@ function render_state(state)
 	for i, p in ipairs(players) do
 		local node = player_nodes[i]
 		local label = player_labels[i]
+		local hp_bg = player_hp_bg[i]
+		local hp_bar = player_hp_bar[i]
+
 		if not node then
 			node = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(PLAYER_SIZE, PLAYER_SIZE, 0))
 			gui.set_pivot(node, gui.PIVOT_CENTER)
@@ -50,45 +74,119 @@ function render_state(state)
 			label = gui.new_text_node(vmath.vector3(0, 0, 0), "")
 			gui.set_font(label, "system_font")
 			gui.set_pivot(label, gui.PIVOT_S)
-			gui.set_scale(label, vmath.vector3(0.7, 0.7, 1))
+			gui.set_scale(label, vmath.vector3(0.6, 0.6, 1))
 			player_labels[i] = label
+
+			hp_bg = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(HP_BAR_W, HP_BAR_H, 0))
+			gui.set_pivot(hp_bg, gui.PIVOT_W)
+			gui.set_color(hp_bg, C.surface)
+			player_hp_bg[i] = hp_bg
+
+			hp_bar = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(HP_BAR_W, HP_BAR_H, 0))
+			gui.set_pivot(hp_bar, gui.PIVOT_W)
+			player_hp_bar[i] = hp_bar
 		end
 
 		local sx = OFFSET_X + (p.x or 0)
 		local sy = OFFSET_Y + (p.y or 0)
-		gui.set_position(node, vmath.vector3(sx, sy, 0))
-		gui.set_position(label, vmath.vector3(sx, sy + PLAYER_SIZE, 0))
-		gui.set_enabled(node, true)
-		gui.set_enabled(label, true)
-
+		local dead = (p.hp or 0) <= 0
 		local is_me = (p.player_id == my_id)
-		if is_me then
-			gui.set_color(node, vmath.vector4(0.2, 0.8, 1.0, 1.0))
-			gui.set_text(label, "YOU")
-			-- Update HUD
-			gui.set_text(gui.get_node("hud_stats"), "K: " .. (p.kills or 0) .. "  D: " .. (p.deaths or 0))
-			gui.set_text(gui.get_node("hud_hp"), "HP: " .. (p.hp or 0))
-			local hp_pct = (p.hp or 100) / 100
-			gui.set_color(gui.get_node("hud_hp"), vmath.vector4(1 - hp_pct, hp_pct, 0.2, 1))
+
+		-- Position player
+		gui.set_position(node, vmath.vector3(sx, sy, 0))
+		gui.set_enabled(node, true)
+
+		-- Player color
+		if dead then
+			gui.set_color(node, vmath.vector4(0.3, 0.3, 0.3, 0.3))
+		elseif is_me then
+			gui.set_color(node, C.primary)
 		else
-			gui.set_color(node, vmath.vector4(1.0, 0.3, 0.3, 1.0))
-			local short_id = string.sub(p.player_id or "", 1, 4)
-			gui.set_text(label, short_id)
+			gui.set_color(node, C.error)
+		end
+
+		-- Glow for own ship
+		if is_me and not dead then
+			gui.set_size(node, vmath.vector3(PLAYER_SIZE + 4, PLAYER_SIZE + 4, 0))
+		else
+			gui.set_size(node, vmath.vector3(PLAYER_SIZE, PLAYER_SIZE, 0))
+		end
+
+		-- Label
+		gui.set_position(label, vmath.vector3(sx, sy + PLAYER_SIZE + 6, 0))
+		gui.set_enabled(label, true)
+		if is_me then
+			gui.set_text(label, "YOU")
+			gui.set_color(label, C.text)
+		else
+			gui.set_text(label, string.sub(p.player_id or "", 1, 6))
+			gui.set_color(label, dead and C.text_muted or C.text)
+		end
+
+		-- HP bar
+		local hp_x = sx - HP_BAR_W / 2
+		local hp_y = sy - PLAYER_SIZE - 2
+		gui.set_position(hp_bg, vmath.vector3(hp_x, hp_y, 0))
+		gui.set_position(hp_bar, vmath.vector3(hp_x, hp_y, 0))
+
+		if dead then
+			gui.set_enabled(hp_bg, false)
+			gui.set_enabled(hp_bar, false)
+		else
+			gui.set_enabled(hp_bg, true)
+			gui.set_enabled(hp_bar, true)
+
+			local max_hp = p.max_hp or 100
+			local hp_frac = (p.hp or 100) / max_hp
+			gui.set_size(hp_bar, vmath.vector3(HP_BAR_W * hp_frac, HP_BAR_H, 0))
+
+			if hp_frac > 0.5 then
+				gui.set_color(hp_bar, C.hp_good)
+			elseif hp_frac > 0.25 then
+				gui.set_color(hp_bar, C.hp_mid)
+			else
+				gui.set_color(hp_bar, C.hp_low)
+			end
+		end
+
+		if is_me then
+			gui.set_text(gui.get_node("hud_stats"), "K: " .. (p.kills or 0) .. "  D: " .. (p.deaths or 0))
+			local hp_text = "HP: " .. (p.hp or 0) .. "/" .. (p.max_hp or 100)
+			gui.set_text(gui.get_node("hud_hp"), hp_text)
+			local hp_pct = (p.hp or 100) / (p.max_hp or 100)
+			if hp_pct > 0.5 then
+				gui.set_color(gui.get_node("hud_hp"), C.hp_good)
+			elseif hp_pct > 0.25 then
+				gui.set_color(gui.get_node("hud_hp"), C.hp_mid)
+			else
+				gui.set_color(gui.get_node("hud_hp"), C.hp_low)
+			end
+
+			-- Boons display
+			local boons = p.boons or config.my_boons or {}
+			if #boons > 0 then
+				gui.set_text(gui.get_node("hud_boons"), "Boons: " .. table.concat(boons, ", "))
+			else
+				gui.set_text(gui.get_node("hud_boons"), "")
+			end
 		end
 	end
+
 	-- Hide unused player nodes
 	for i = #players + 1, #player_nodes do
 		gui.set_enabled(player_nodes[i], false)
 		gui.set_enabled(player_labels[i], false)
+		gui.set_enabled(player_hp_bg[i], false)
+		gui.set_enabled(player_hp_bar[i], false)
 	end
 
-	-- Render projectiles
+	-- Render projectiles (cannonballs)
 	for i, proj in ipairs(projectiles) do
 		local node = projectile_nodes[i]
 		if not node then
 			node = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(PROJECTILE_SIZE, PROJECTILE_SIZE, 0))
 			gui.set_pivot(node, gui.PIVOT_CENTER)
-			gui.set_color(node, vmath.vector4(1.0, 1.0, 0.2, 1.0))
+			gui.set_color(node, C.error)
 			projectile_nodes[i] = node
 		end
 

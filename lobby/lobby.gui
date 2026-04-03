@@ -4,13 +4,21 @@ fonts {
   font: "/builtins/fonts/default.font"
 }
 nodes {
+  type: TYPE_BOX
+  id: "screen_bg"
+  size { x: 1280.0 y: 720.0 z: 0.0 w: 1.0 }
+  color { x: 0.051 y: 0.122 z: 0.235 w: 1.0 }
+  position { x: 640.0 y: 360.0 z: 0.0 w: 1.0 }
+  pivot: PIVOT_CENTER
+}
+nodes {
   type: TYPE_TEXT
   id: "player_info"
   text: "Player: ..."
   font: "system_font"
   position { x: 640.0 y: 500.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
-  color { x: 0.6 y: 0.6 z: 0.6 w: 1.0 }
+  color { x: 0.576 y: 0.557 z: 0.627 w: 1.0 }
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 nodes {
@@ -20,13 +28,14 @@ nodes {
   font: "system_font"
   position { x: 640.0 y: 420.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
+  color { x: 0.878 y: 0.882 z: 0.961 w: 1.0 }
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 nodes {
   type: TYPE_BOX
   id: "find_btn"
   size { x: 250.0 y: 60.0 z: 0.0 w: 1.0 }
-  color { x: 0.0 y: 0.8 z: 0.8 w: 1.0 }
+  color { x: 0.373 y: 0.255 z: 0.847 w: 1.0 }
   position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
 }
@@ -37,7 +46,7 @@ nodes {
   font: "system_font"
   position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
-  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  color { x: 0.878 y: 0.882 z: 0.961 w: 1.0 }
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }
 nodes {
@@ -56,7 +65,7 @@ nodes {
   font: "system_font"
   position { x: 640.0 y: 330.0 z: 0.0 w: 1.0 }
   pivot: PIVOT_CENTER
-  color { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
+  color { x: 0.878 y: 0.882 z: 0.961 w: 1.0 }
   enabled: false
   outline { x: 0.0 y: 0.0 z: 0.0 w: 1.0 }
 }

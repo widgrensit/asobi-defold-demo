@@ -1,0 +1,40 @@
+local config = require("main.game_config")
+
+function init(self)
+	self.remaining = 3
+	self.timer = 0
+	self.done = false
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("start_countdown") then
+		self.remaining = 3
+		self.timer = 0
+		self.done = false
+		gui.set_text(gui.get_node("countdown_text"), "3")
+		gui.set_color(gui.get_node("countdown_text"), config.COLORS.primary)
+		local node = gui.get_node("countdown_text")
+		gui.set_scale(node, vmath.vector3(4, 4, 1))
+	end
+end
+
+function update(self, dt)
+	if self.done then return end
+
+	self.timer = self.timer + dt
+	if self.timer >= 1.0 then
+		self.timer = self.timer - 1.0
+		self.remaining = self.remaining - 1
+
+		local node = gui.get_node("countdown_text")
+		if self.remaining > 0 then
+			gui.set_text(node, tostring(self.remaining))
+		elseif self.remaining == 0 then
+			gui.set_text(node, "GO!")
+			gui.set_color(node, config.COLORS.tertiary)
+		else
+			self.done = true
+			msg.post("/controller#script", "countdown_done")
+		end
+	end
+end
