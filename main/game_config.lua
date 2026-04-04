@@ -1,7 +1,7 @@
 local M = {}
 
-M.HOST = "localhost"
-M.PORT = 8084
+M.HOST = nil
+M.PORT = nil
 M.GAME_MODE = "arena"
 M.LEADERBOARD_ID = "arena_kills"
 

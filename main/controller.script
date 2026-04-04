@@ -2,6 +2,7 @@ local asobi = require("asobi.client")
 local config = require("main.game_config")
 
 -- Game states
+local STATE_SERVER_SELECT = "server_select"
 local STATE_LOGIN = "login"
 local STATE_LOBBY = "lobby"
 local STATE_COUNTDOWN = "countdown"
@@ -10,7 +11,7 @@ local STATE_BOON_PICK = "boon_pick"
 local STATE_VOTING = "voting"
 local STATE_RESULTS = "results"
 
-local ALL_GUIS = {"login_gui", "lobby_gui", "countdown_gui", "arena_gui", "boon_gui", "vote_gui", "results_gui"}
+local ALL_GUIS = {"server_gui", "login_gui", "lobby_gui", "countdown_gui", "arena_gui", "boon_gui", "vote_gui", "results_gui"}
 
 local function show_only(gui_id)
 	for _, id in ipairs(ALL_GUIS) do
@@ -24,8 +25,7 @@ end
 
 function init(self)
 	msg.post(".", "acquire_input_focus")
-	config.client = asobi.create(config.HOST, config.PORT)
-	self.state = STATE_LOGIN
+	self.state = STATE_SERVER_SELECT
 	self.mouse_x = 0
 	self.mouse_y = 0
 
@@ -37,7 +37,7 @@ function init(self)
 	self.current_phase = nil
 	self.auto_queue_timer = nil
 
-	show_only("login_gui")
+	show_only("server_gui")
 end
 
 function update(self, dt)
@@ -78,6 +78,8 @@ function update(self, dt)
 end
 
 function on_input(self, action_id, action)
+	if self.state ~= STATE_ARENA then return false end
+
 	if action_id == hash("move_up") then
 		self.move_up = not action.released
 	elseif action_id == hash("move_down") then
@@ -92,12 +94,19 @@ function on_input(self, action_id, action)
 
 	if action.x and action.y then
 		self.mouse_x = action.x - 240
-		self.mouse_y = config.ARENA_HEIGHT - (action.y - 60)
+		self.mouse_y = action.y - 60
 	end
 end
 
 function on_message(self, message_id, message)
-	if message_id == hash("switch_to_lobby") then
+	if message_id == hash("server_selected") then
+		config.HOST = message.host
+		config.PORT = message.port
+		config.client = asobi.create(message.host, message.port, message.use_ssl)
+		self.state = STATE_LOGIN
+		show_only("login_gui")
+
+	elseif message_id == hash("switch_to_lobby") then
 		self.state = STATE_LOBBY
 		self.match_started = false
 		self.current_phase = nil
@@ -147,11 +156,12 @@ function on_message(self, message_id, message)
 		self.auto_queue_timer = 3.0
 
 	elseif message_id == hash("switch_to_login") then
-		self.state = STATE_LOGIN
+		self.state = STATE_SERVER_SELECT
 		self.match_started = false
 		self.current_phase = nil
 		self.auto_queue_timer = nil
-		show_only("login_gui")
+		config.client = nil
+		show_only("server_gui")
 
 	elseif message_id == hash("find_match") then
 		self.searching = true

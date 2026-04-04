@@ -1,0 +1,29 @@
+local config = require("main.game_config")
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("shoot") and action.pressed then
+		local local_btn = gui.get_node("local_btn")
+		local web_btn = gui.get_node("web_btn")
+
+		if gui.pick_node(local_btn, action.x, action.y) then
+			msg.post("/controller#script", "server_selected", {
+				host = "localhost",
+				port = 8085,
+				use_ssl = false
+			})
+			return true
+		elseif gui.pick_node(web_btn, action.x, action.y) then
+			msg.post("/controller#script", "server_selected", {
+				host = "play.asobi.dev",
+				port = 443,
+				use_ssl = true
+			})
+			return true
+		end
+	end
+	return false
+end
