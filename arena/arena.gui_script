@@ -67,8 +67,11 @@ function render_state(state)
 		local hp_bar = player_hp_bar[i]
 
 		if not node then
-			node = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(PLAYER_SIZE, PLAYER_SIZE, 0))
+			local ship_size = PLAYER_SIZE * 2.5
+			node = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(ship_size, ship_size, 0))
 			gui.set_pivot(node, gui.PIVOT_CENTER)
+			gui.set_texture(node, "ships")
+			gui.play_flipbook(node, "player")
 			player_nodes[i] = node
 
 			label = gui.new_text_node(vmath.vector3(0, 0, 0), "")
@@ -96,20 +99,26 @@ function render_state(state)
 		gui.set_position(node, vmath.vector3(sx, sy, 0))
 		gui.set_enabled(node, true)
 
-		-- Player color
-		if dead then
-			gui.set_color(node, vmath.vector4(0.3, 0.3, 0.3, 0.3))
-		elseif is_me then
-			gui.set_color(node, C.primary)
-		else
-			gui.set_color(node, C.error)
-		end
+		-- Ship texture and color
+		local ok_tex, err_tex = pcall(function()
+			if is_me then
+				gui.play_flipbook(node, "player")
+			else
+				gui.play_flipbook(node, "enemy")
+			end
+		end)
 
-		-- Glow for own ship
-		if is_me and not dead then
-			gui.set_size(node, vmath.vector3(PLAYER_SIZE + 4, PLAYER_SIZE + 4, 0))
+		if dead then
+			gui.set_color(node, vmath.vector4(0.5, 0.5, 0.5, 0.3))
+		elseif not ok_tex then
+			-- Fallback: colored box if texture fails
+			if is_me then
+				gui.set_color(node, C.primary)
+			else
+				gui.set_color(node, C.error)
+			end
 		else
-			gui.set_size(node, vmath.vector3(PLAYER_SIZE, PLAYER_SIZE, 0))
+			gui.set_color(node, vmath.vector4(1, 1, 1, 1))
 		end
 
 		-- Label
@@ -186,7 +195,11 @@ function render_state(state)
 		if not node then
 			node = gui.new_box_node(vmath.vector3(0, 0, 0), vmath.vector3(PROJECTILE_SIZE, PROJECTILE_SIZE, 0))
 			gui.set_pivot(node, gui.PIVOT_CENTER)
-			gui.set_color(node, C.error)
+			pcall(function()
+				gui.set_texture(node, "ships")
+				gui.play_flipbook(node, "cannonball")
+			end)
+			gui.set_color(node, C.tertiary)
 			projectile_nodes[i] = node
 		end
 
