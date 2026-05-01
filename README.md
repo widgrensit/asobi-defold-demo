@@ -7,13 +7,21 @@ Top-down arena shooter demo for the [Asobi](https://github.com/widgrensit/asobi)
 ### Prerequisites
 
 - [Defold Editor](https://defold.com/download/) or [bob.jar](https://defold.com/manuals/bob/) CLI
-- An Asobi backend running (local or remote)
+- An [`asobi_arena_lua`](https://github.com/widgrensit/asobi_arena_lua) backend running locally:
 
-### Install SDK
+   ```bash
+   git clone https://github.com/widgrensit/asobi_arena_lua
+   cd asobi_arena_lua && docker compose up -d
+   ```
 
-Symlink the asobi-defold SDK into the project:
+   Server listens on `http://localhost:8085`. (This demo plays the *full* arena game — boons, modifiers, voting, bots — so it needs the arena Lua, not the minimal `sdk_demo_backend`.)
+
+### Install the SDK
+
+The `asobi/` directory in this repo is the SDK source, currently checked in for local-development convenience. To pull a released SDK version instead, replace the contents of `asobi/` with a symlink or fresh clone of [`asobi-defold`](https://github.com/widgrensit/asobi-defold):
 
 ```bash
+rm -rf asobi
 ln -s /path/to/asobi-defold/asobi asobi
 ```
 
@@ -31,7 +39,7 @@ Or open the project in the Defold Editor and press F5.
 
 On launch you choose which server to connect to:
 
-- **LOCAL** — `localhost:8085` (for [asobi_arena_lua](https://github.com/widgrensit/asobi_arena_lua) via Docker Compose or a local Erlang node)
+- **LOCAL** — `localhost:8085` (for [asobi_arena_lua](https://github.com/widgrensit/asobi_arena_lua) running via Docker Compose)
 - **PLAY ONLINE** — `play.asobi.dev` (production server)
 
 ## Game Flow
@@ -71,7 +79,7 @@ Single collection with a controller script managing game state transitions. GUI 
 | `boon/boon.gui_script` | Boon card selection UI |
 | `vote/vote.gui_script` | Modifier voting with live tallies |
 | `server/server.gui_script` | Server selection (local/online) |
-| `asobi/` | SDK (symlinked) — HTTP client, WebSocket, API modules |
+| `asobi/` | SDK source — HTTP client, WebSocket, API modules (see "Install the SDK" above) |
 
 ### Assets
 
