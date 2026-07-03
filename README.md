@@ -18,10 +18,9 @@ Top-down arena shooter demo for the [Asobi](https://github.com/widgrensit/asobi)
 
 ### Install the SDK
 
-The `asobi/` directory in this repo is the SDK source, currently checked in for local-development convenience. To pull a released SDK version instead, replace the contents of `asobi/` with a symlink or fresh clone of [`asobi-defold`](https://github.com/widgrensit/asobi-defold):
+The `asobi/` directory is the SDK source and is git-ignored, so it is not part of this repo. Symlink it (or drop in a fresh clone of [`asobi-defold`](https://github.com/widgrensit/asobi-defold)) before building:
 
 ```bash
-rm -rf asobi
 ln -s /path/to/asobi-defold/asobi asobi
 ```
 
