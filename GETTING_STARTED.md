@@ -16,30 +16,22 @@ The `bob.jar` CLI path is for CI and headless builds; see the
   Java install needed for the editor path).
 - [Docker](https://docs.docker.com/get-docker/): Docker Desktop on Windows
   (WSL2 backend) and macOS, Docker Engine or Desktop on Linux.
+- The [asobi CLI](https://github.com/widgrensit/asobi-cli) (for `asobi dev`).
 - Git.
 
 ## 2. Start the backend
 
-The demo plays the full arena game (boons, modifiers, voting, bots), so it needs
-the `asobi_arena_lua` backend, not the minimal `sdk_demo_backend`.
-
-On Windows, start Docker Desktop first and wait until it reports "running". Then
-in any terminal (PowerShell, Git Bash, WSL, or a Linux/macOS shell):
-
-```
-git clone https://github.com/widgrensit/asobi_arena_lua
-cd asobi_arena_lua
-docker compose up -d
-```
-
-The server listens on `http://localhost:8085`. `localhost` works the same on all
-three OSes because Docker publishes the port to the host.
-
-Check it is up:
+The full arena game logic (boons, modifiers, voting, bots) is bundled in `lua/`.
+Run it locally with the [asobi CLI](https://github.com/widgrensit/asobi-cli). On
+Windows, start Docker Desktop first and wait until it reports "running", then in
+any terminal (PowerShell, Git Bash, WSL, or a Linux/macOS shell):
 
 ```
-docker compose ps
+asobi dev
 ```
+
+The server listens on `http://localhost:8084`, hot-reloads the `lua/` on save, and
+`localhost` works the same on all three OSes. Leave it running.
 
 ## 3. Add the SDK to the demo
 
@@ -67,7 +59,7 @@ If you plan to edit the SDK in place, use a link instead of a copy:
 Open this demo's `game.project` in the editor, run **Project -> Fetch Libraries**
 (pulls the WebSocket extension), then build and run as usual. Same on every OS; no
 platform strings or file permissions to set by hand. On the server-select screen
-choose **LOCAL** to hit `localhost:8085`.
+choose **LOCAL** to hit `localhost:8084`.
 
 ## 5. Play
 
@@ -82,16 +74,13 @@ build once and launch the binary twice) and log in as a different user.
 
 ## Stopping the backend
 
-```
-cd asobi_arena_lua
-docker compose down
-```
+Press Ctrl+C in the terminal running `asobi dev`.
 
 ## Troubleshooting
 
-- **Can't connect / connection refused**: the backend is not up. Run
-  `docker compose ps` in `asobi_arena_lua`. On Windows and macOS, confirm Docker
-  Desktop itself is running.
+- **Can't connect / connection refused**: the backend is not up. Make sure
+  `asobi dev` is still running. On Windows and macOS, confirm Docker Desktop
+  itself is running.
 - **"WebSocket callback invalid" or realtime silently dead**: register WebSocket
   callbacks from a `.script` in `main.collection` that lives for the whole app,
   never from a `gui_script` or a collection that gets unloaded.

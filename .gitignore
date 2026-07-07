@@ -6,3 +6,5 @@
 # Symlinked SDK
 asobi
 /.editor_settings
+# asobi dev local backend
+.asobi/
