@@ -4,35 +4,15 @@ Top-down arena shooter demo for the [Asobi](https://github.com/widgrensit/asobi)
 
 ## Quick Start
 
-### Prerequisites
+New here? Follow **[GETTING_STARTED.md](GETTING_STARTED.md)** for full step-by-step
+setup on Windows, Linux, and macOS. The short version:
 
-- [Defold Editor](https://defold.com/download/) or [bob.jar](https://defold.com/manuals/bob/) CLI
-- An [`asobi_arena_lua`](https://github.com/widgrensit/asobi_arena_lua) backend running locally:
+1. Start the backend: `git clone https://github.com/widgrensit/asobi_arena_lua && cd asobi_arena_lua && docker compose up -d` (serves `http://localhost:8085`). This demo plays the *full* arena game (boons, modifiers, voting, bots), so it needs the arena Lua, not the minimal `sdk_demo_backend`.
+2. Add the SDK: clone [`asobi-defold`](https://github.com/widgrensit/asobi-defold) and copy its `asobi/` folder into this repo (the folder is git-ignored). Copying works on every OS with no admin rights; see the guide for the symlink alternative.
+3. Run it: open `game.project` in the [Defold editor](https://defold.com/download/), **Project -> Fetch Libraries**, then press **F5**. This is identical on every OS.
 
-   ```bash
-   git clone https://github.com/widgrensit/asobi_arena_lua
-   cd asobi_arena_lua && docker compose up -d
-   ```
-
-   Server listens on `http://localhost:8085`. (This demo plays the *full* arena game — boons, modifiers, voting, bots — so it needs the arena Lua, not the minimal `sdk_demo_backend`.)
-
-### Install the SDK
-
-The `asobi/` directory is the SDK source and is git-ignored, so it is not part of this repo. Symlink it (or drop in a fresh clone of [`asobi-defold`](https://github.com/widgrensit/asobi-defold)) before building:
-
-```bash
-ln -s /path/to/asobi-defold/asobi asobi
-```
-
-### Build & Run
-
-```bash
-java -jar bob.jar --platform x86_64-linux resolve build
-chmod +x build/x86_64-linux/dmengine
-./build/x86_64-linux/dmengine
-```
-
-Or open the project in the Defold Editor and press F5.
+The `bob.jar` CLI build (with per-OS platform strings) is in the
+[getting-started appendix](GETTING_STARTED.md#appendix-cli-build-with-bobjar).
 
 ## Server Selection
 
