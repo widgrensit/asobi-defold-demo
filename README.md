@@ -7,7 +7,7 @@ Top-down arena shooter demo for the [Asobi](https://github.com/widgrensit/asobi)
 New here? Follow **[GETTING_STARTED.md](GETTING_STARTED.md)** for full step-by-step
 setup on Windows, Linux, and macOS. The short version:
 
-1. Start the backend: `git clone https://github.com/widgrensit/asobi_arena_lua && cd asobi_arena_lua && docker compose up -d` (serves `http://localhost:8085`). This demo plays the *full* arena game (boons, modifiers, voting, bots), so it needs the arena Lua, not the minimal `sdk_demo_backend`.
+1. Start the backend: `asobi dev` (needs the [asobi CLI](https://github.com/widgrensit/asobi-cli) + Docker). The full arena game logic (boons, modifiers, voting, bots) is bundled in `lua/`, so this one command serves it on `http://localhost:8084`.
 2. Add the SDK: clone [`asobi-defold`](https://github.com/widgrensit/asobi-defold) and copy its `asobi/` folder into this repo (the folder is git-ignored). Copying works on every OS with no admin rights; see the guide for the symlink alternative.
 3. Run it: open `game.project` in the [Defold editor](https://defold.com/download/), **Project -> Fetch Libraries**, then press **F5**. This is identical on every OS.
 
@@ -18,7 +18,7 @@ The `bob.jar` CLI build (with per-OS platform strings) is in the
 
 On launch you choose which server to connect to:
 
-- **LOCAL** — `localhost:8085` (for [asobi_arena_lua](https://github.com/widgrensit/asobi_arena_lua) running via Docker Compose)
+- **LOCAL** — `localhost:8084` (the bundled `lua/` arena, run with `asobi dev`)
 - **PLAY ONLINE** — `play.asobi.dev` (production server)
 
 ## Game Flow
