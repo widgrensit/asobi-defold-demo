@@ -46,7 +46,7 @@ function update(self, dt)
 	end
 
 	if self.state == STATE_ARENA and self.match_started then
-		config.client.realtime.send_match_input({
+		config.client.realtime:send_match_input({
 			up = self.move_up or false,
 			down = self.move_down or false,
 			left = self.move_left or false,
@@ -166,58 +166,63 @@ function on_message(self, message_id, message)
 	elseif message_id == hash("find_match") then
 		self.searching = true
 		self.search_time = 0
-		config.client.realtime.add_to_matchmaker(config.GAME_MODE)
+		config.client.realtime:add_to_matchmaker(config.GAME_MODE)
 
 	elseif message_id == hash("cancel_search") then
 		self.searching = false
 
 	elseif message_id == hash("boon_picked") then
-		config.client.realtime.send_match_input({
+		config.client.realtime:send_match_input({
 			type = "boon_pick",
 			boon_id = message.boon_id
 		})
 
 	elseif message_id == hash("vote_cast") then
-		config.client.realtime.cast_vote(message.vote_id, message.option_id)
+		config.client.realtime:cast_vote(message.vote_id, message.option_id)
 	end
 end
 
 function connect_realtime(self)
 	local rt = config.client.realtime
 
-	rt.on("connected", function()
+	rt:on("connected", function()
 		msg.post("#lobby_gui", "set_status", {text = "Connected! Ready to play."})
 	end)
 
-	rt.on("disconnected", function(reason)
+	rt:on("disconnected", function(reason)
 		msg.post("#lobby_gui", "set_status", {text = "WS disconnected: " .. tostring(reason)})
 	end)
 
-	rt.on("matchmaker_matched", function(payload)
+	rt:on("match_matched", function(payload)
 		self.searching = false
 		if payload.match_id then
-			config.client.realtime.join_match(payload.match_id)
+			config.client.realtime:join_match(payload.match_id)
 		end
 		msg.post(".", "switch_to_countdown")
 	end)
 
-	rt.on("error", function(payload)
+	rt:on("error", function(payload)
 		self.searching = false
 		msg.post("#lobby_gui", "set_status", {text = "WS error: " .. tostring(payload.error or "unknown")})
 	end)
 
 	setup_match_callbacks(self)
-	rt.connect()
+	rt:connect()
 end
 
 function setup_match_callbacks(self)
 	local rt = config.client.realtime
 
-	rt.on("match_state", function(payload)
+	rt:on("match_state", function(payload)
 		local phase = payload.phase or "playing"
 
 		if phase == "playing" then
-			if self.current_phase == "boon_pick" or self.current_phase == "voting" then
+			-- Enter the arena on the first playing frame (there is no separate
+			-- "match started" server event; the matchmaker auto-joins and
+			-- match.state begins), or when returning from boon_pick / voting.
+			if not self.match_started or self.current_phase == "boon_pick" or self.current_phase == "voting" then
+				self.match_started = true
+				self.current_phase = nil
 				msg.post(".", "switch_to_arena")
 			end
 			self.latest_state = payload
@@ -242,18 +247,12 @@ function setup_match_callbacks(self)
 		end
 	end)
 
-	rt.on("match_started", function(payload)
-		self.current_phase = nil
-		self.match_started = true
-		msg.post(".", "switch_to_arena")
-	end)
-
-	rt.on("match_finished", function(payload)
+	rt:on("match_finished", function(payload)
 		config.match_result = payload
 		msg.post(".", "switch_to_results")
 	end)
 
-	rt.on("vote_start", function(payload)
+	rt:on("vote_start", function(payload)
 		-- Store complex data in config for the vote GUI to read
 		config.vote_data = {
 			vote_id = payload.vote_id,
@@ -263,7 +262,7 @@ function setup_match_callbacks(self)
 		msg.post(".", "switch_to_voting")
 	end)
 
-	rt.on("vote_tally", function(payload)
+	rt:on("vote_tally", function(payload)
 		if self.state == STATE_VOTING then
 			config.vote_tally_data = {
 				tallies = payload.tallies or {},
@@ -274,7 +273,7 @@ function setup_match_callbacks(self)
 		end
 	end)
 
-	rt.on("vote_result", function(payload)
+	rt:on("vote_result", function(payload)
 		if self.state == STATE_VOTING then
 			config.vote_result_data = {
 				winner = payload.winner,
